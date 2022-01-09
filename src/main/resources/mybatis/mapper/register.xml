@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lijian.dao.HouseMapper">
+    <sql id="user_column">
+       username,telphone,status,createtime
+    </sql>
+
+    <insert id="insertUser" parameterType="com.lijian.domain.entity.User" useGeneratedKeys="true" keyProperty="userId" >
+        INSERT INTO
+        user(<include refid="user_column"/>)
+        VALUES
+        (#{userName},#{telPhone},#{status},#{createTime})
+    </insert>
+
+    <sql id="register_column">
+        userid,buildid,status,recommender,createtime
+    </sql>
+
+    <insert id="insertRegister" parameterType="com.lijian.domain.entity.Register">
+        INSERT INTO
+        register(<include refid="register_column"/>)
+        VALUES
+        (#{userId},#{buildId},#{status},#{recommender},NOW())
+    </insert>
+
+    <select id="queryUser" parameterType="java.lang.String" resultType="com.lijian.domain.entity.User">
+        SELECT userid,username,telphone,status from user where status = '0' and telphone = #{telPhone}
+    </select>
+
+    <select id="queryUserList" parameterType="java.lang.String" resultType="com.lijian.domain.entity.User">
+        SELECT userid,username,telphone,status from user where status = #{status}
+    </select>
+
+    <select id="queryRegister" parameterType="java.util.HashMap" resultType="com.lijian.domain.entity.Register">
+        SELECT registerid,userid,buildid,status,recommender from register where status = '0' and userid = #{userId} and buildid = #{buildId}
+    </select>
+
+    <select id="queryRegisterList" parameterType="java.lang.String" resultType="com.lijian.domain.entity.Register">
+        SELECT registerid,userid,buildid,status,recommender from register where status = #{status}
+    </select>
+    
+    <select id="queryRegisterMsgList" parameterType="com.lijian.domain.entity.Request" resultType="java.util.HashMap" >
+      SELECT registerid,buildid,recommender,b.username,b.telphone,DATE_FORMAT(a.createtime,'%Y-%m-%d') createtime from register a,user b where a.userid = b.userid and a.status = '0' and b.status = '0'
+      <if test="buildId != null and buildId != ''">  and a.buildid = #{buildId}  </if>
+      <if test="userName != null and userName != ''">  and b.username = #{userName}  </if>
+      <if test="telPhone != null and telPhone != ''">  and b.telphone = #{telPhone}  </if>
+      <if test="recommender != null and recommender != ''">  and a.recommender like '%'#{recommender}'%'  </if>
+        order by a.createtime desc
+    </select>
+
+</mapper>
